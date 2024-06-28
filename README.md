@@ -1,13 +1,20 @@
-import time, datetime
-import queue
-import pandas as pd
-from threading import Thread
-from lightweight_charts import Chart
+#Creating a Virtual environment
 
-from ibapi.client import EClient
-from ibapi.wrapper import EWrapper
-from ibapi.client import Contract, Order, ScannerSubscription
-from ibapi.tag_value import TagValue
+python3 -m venv venv
+. venv/bin/activate
+
+#Installing Dependencies
+Now that we have our virtual environment set up, we can install the packages we will be using. We will do this using the pip command.
+
+First installing the lightweight-charts package:
+
+pip install lightweight-charts
+
+#Next download the TWS API. Be sure to download the latest stable package for your operating system. Place the zip file in your project directory (eg. ib-trading) and unzip it.
+
+Change to the IBJts/source/pythonclient directory. Then type:
+
+python3 setup.py install
 
 # create a queue for data coming from Interactive Brokers API
 data_queue = queue.Queue()
