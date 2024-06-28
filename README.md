@@ -1,18 +1,18 @@
-#Charting app to analyse Chart using LLM
+#**Charting app to analyse Chart using LLM**
 
 #Creating a Virtual environment
 
 python3 -m venv venv
 . venv/bin/activate
 
-#Installing Dependencies
+**#Installing Dependencies**
 Now that we have our virtual environment set up, we can install the packages we will be using. We will do this using the pip command.
 
 First installing the lightweight-charts package:
 
 pip install lightweight-charts
 
-#Next download the TWS API. Be sure to download the latest stable package for your operating system. Place the zip file in your project directory (eg. ib-trading) and unzip it.
+**#Next download the TWS API. Be sure to download the latest stable package for your operating system. Place the zip file in your project directory (eg. ib-trading) and unzip it.**
 
 Change to the IBJts/source/pythonclient directory. Then type:
 
