@@ -132,8 +132,18 @@ def get_bar_data(symbol, timeframe):
 def take_screenshot(key):
     img = chart.screenshot()
     t = time.time()
-    with open(f"screenshot-{t}.png", 'wb') as f:
+    chart_filename = f"screenshots/screenshot-{t}.png"
+    analysis_filename = f"screenshots/screenshot-{t}.md"
+
+    with open(chart_filename, 'wb') as f:
         f.write(img)
+
+    analysis = analyze_chart(chart_filename)
+
+    print(analysis)
+
+    with open(analysis_filename, "w") as text_file:
+        text_file.write(analysis)
 
 
 # handles when the user uses an order hotkey combination
