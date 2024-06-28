@@ -1,3 +1,5 @@
+#Charting app to analyse Chart using LLM
+
 #Creating a Virtual environment
 
 python3 -m venv venv
@@ -56,28 +58,7 @@ class PTLClient(EWrapper, EClient):
         else:
             print('Error {}: {}'.format(code, msg))
 
-
-    def nextValidId(self, orderId: int):
-        super().nextValidId(orderId)
-        self.order_id = orderId
-        print(f"next valid id is {self.order_id}")
-
-    # callback when historical data is received from Interactive Brokers
-    def historicalData(self, req_id, bar):
-        t = datetime.datetime.fromtimestamp(int(bar.date))
-
-        # creation bar dictionary for each bar received
-        data = {
-            'date': t,
-            'open': bar.open,
-            'high': bar.high,
-            'low': bar.low,
-            'close': bar.close,
-            'volume': int(bar.volume)
-        }
-
-        # Put the data into the queue
-        data_queue.put(data)
+ 
 
 
     # callback when all historical data has been received
@@ -135,52 +116,11 @@ def get_bar_data(symbol, timeframe):
     chart.watermark(symbol)
 
 
-# handler for the screenshot button
-def take_screenshot(key):
-    img = chart.screenshot()
-    t = time.time()
-    with open(f"screenshot-{t}.png", 'wb') as f:
-        f.write(img)
 
-
-# handles when the user uses an order hotkey combination
-def place_order(key):
-    # get current symbol
-    symbol = chart.topbar['symbol'].value
-
-    # build contract object
-    contract = Contract()
-    contract.symbol = symbol
-    contract.secType = "STK"
-    contract.currency = "USD"
-    contract.exchange = "SMART"
     
-    # build order object
-    order = Order()
-    order.orderType = "MKT"
-    order.totalQuantity = 1
     
-    # get next order id
-    client.reqIds(-1)
-    time.sleep(2)
-    
-    # set action to buy or sell depending on key pressed
-    # shift+O is for a buy order
-    if key == 'O':
-        print("buy order")
-        order.action = "BUY"
-
-    # shift+P for a sell order
-    if key == 'P':
-        print("sell order")
-        order.action = "SELL"
-
-    # place the order
-    if client.order_id:
-        print("got order id, placing buy order")
-        client.placeOrder(client.order_id, contract, order)
-
-
+      
+      
 # implement an Interactive Brokers market scanner
 def do_scan(scan_code):
     scannerSubscription = ScannerSubscription()
@@ -218,12 +158,7 @@ def on_horizontal_line_move(chart, line):
     print(f'Horizontal line moved to: {line.price}')
 
 
-# called when we want to render scan results
-def display_scan():
-    # function to call when one of the scan results is clicked
-    def on_row_click(row):
-        chart.topbar['symbol'].set(row['symbol'])
-        get_bar_data(row['symbol'], '5 mins')
+
 
     # create a table on the UI, pass callback function for when a row is clicked
     table = chart.create_table(
@@ -290,65 +225,9 @@ def update_chart():
             chart.spinner(False)
 
 
-if __name__ == '__main__':
-    # create a client object
-    client = PTLClient(DEFAULT_HOST, TRADING_PORT, DEFAULT_CLIENT_ID)
+  #analyse using ChatGPT4
 
-    # create chart object, specify display settings
-    chart = Chart(toolbox=True, width=1000, inner_width=0.6, inner_height=1)
-
-    # hotkey to place a buy order
-    chart.hotkey('shift', 'O', place_order)
-
-    # hotkey to place a sell order
-    chart.hotkey('shift', 'P', place_order)
-
-    chart.legend(True)
     
-    # set up a function to call when searching for symbol
-    chart.events.search += on_search
-
-    # set up top bar
-    chart.topbar.textbox('symbol', INITIAL_SYMBOL)
-
-    # give ability to switch between timeframes
-    chart.topbar.switcher('timeframe', ('5 mins', '15 mins', '1 hour'), default='5 mins', func=on_timeframe_selection)
-
-    # populate initial chart
-    get_bar_data(INITIAL_SYMBOL, '5 mins')
-
-    # run a market scanner
-    do_scan("HOT_BY_VOLUME")
-
-    # create a button for taking a screenshot of the chart
-    chart.topbar.button('screenshot', 'Screenshot', func=take_screenshot)
-
-    # show the chart
-    chart.show(block=True)
-Bonus GPT4o Integration
-I released a follow up video where I make the take_screenshot() function call GPT4o. Here is a modification you can make to the take_screenshot() function. Note that we import analyze_chart() from a new file that is included down below:
-
-from gpt4o_technical_analyst import analyze_chart
-
-# handler for the screenshot button
-def take_screenshot(key):
-    img = chart.screenshot()
-    t = time.time()
-    chart_filename = f"screenshots/screenshot-{t}.png"
-    analysis_filename = f"screenshots/screenshot-{t}.md"
-
-    with open(chart_filename, 'wb') as f:
-        f.write(img)
-
-    analysis = analyze_chart(chart_filename)
-
-    print(analysis)
-
-    with open(analysis_filename, "w") as text_file:
-        text_file.write(analysis)
-Then just define an analyze_chart() function, which you can save in a file named gpt4o_technical_analyst.py:
-
-import os
 import base64
 from openai import OpenAI
 
